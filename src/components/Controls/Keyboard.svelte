@@ -1,8 +1,8 @@
 <script>
-	import { userGrid } from '@sudoku/stores/grid';
 	import { cursor } from '@sudoku/stores/cursor';
 	import { notes } from '@sudoku/stores/notes';
 	import { candidates } from '@sudoku/stores/candidates';
+	import { guess } from '@sudoku/stores/history';
 
 	// TODO: Improve keyboardDisabled
 	import { keyboardDisabled } from '@sudoku/stores/keyboard';
@@ -15,13 +15,14 @@
 				} else {
 					candidates.add($cursor, num);
 				}
-				userGrid.set($cursor, 0);
+
+				guess({ row: $cursor.y, col: $cursor.x, value: 0 });
 			} else {
 				if ($candidates.hasOwnProperty($cursor.x + ',' + $cursor.y)) {
 					candidates.clear($cursor);
 				}
 
-				userGrid.set($cursor, num);
+				guess({ row: $cursor.y, col: $cursor.x, value: num });
 			}
 		}
 	}
@@ -77,7 +78,6 @@
 <svelte:window on:keydown={handleKey} /><!--on:beforeunload|preventDefault={e => e.returnValue = ''} />-->
 
 <div class="keyboard-grid">
-
 	{#each Array(10) as _, keyNum}
 		{#if keyNum === 9}
 			<button class="btn btn-key" disabled={$keyboardDisabled} title="Erase Field" on:click={() => handleKeyButton(0)}>
@@ -91,14 +91,12 @@
 			</button>
 		{/if}
 	{/each}
-
 </div>
 
 <style>
 	.keyboard-grid {
 		@apply grid grid-rows-2 grid-cols-5 gap-3;
 	}
-
 
 	.btn-key {
 		@apply py-4 px-0;

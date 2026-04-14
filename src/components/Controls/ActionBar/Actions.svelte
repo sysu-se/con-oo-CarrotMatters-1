@@ -7,6 +7,7 @@
 	import { settings } from '@sudoku/stores/settings';
 	import { keyboardDisabled } from '@sudoku/stores/keyboard';
 	import { gamePaused } from '@sudoku/stores/game';
+	import { applyHint, historyState, redo, undo } from '@sudoku/stores/history';
 
 	$: hintsAvailable = $hints > 0;
 
@@ -16,20 +17,19 @@
 				candidates.clear($cursor);
 			}
 
-			userGrid.applyHint($cursor);
+			applyHint({ row: $cursor.y, col: $cursor.x });
 		}
 	}
 </script>
 
 <div class="action-buttons space-x-3">
-
-	<button class="btn btn-round" disabled={$gamePaused} title="Undo">
+	<button class="btn btn-round" disabled={$gamePaused || !$historyState.canUndo} on:click={undo} title="Undo">
 		<svg class="icon-outline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
 		</svg>
 	</button>
 
-	<button class="btn btn-round" disabled={$gamePaused} title="Redo">
+	<button class="btn btn-round" disabled={$gamePaused || !$historyState.canRedo} on:click={redo} title="Redo">
 		<svg class="icon-outline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 			<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 10h-10a8 8 90 00-8 8v2M21 10l-6 6m6-6l-6-6" />
 		</svg>
@@ -52,9 +52,7 @@
 
 		<span class="badge tracking-tighter" class:badge-primary={$notes}>{$notes ? 'ON' : 'OFF'}</span>
 	</button>
-
 </div>
-
 
 <style>
 	.action-buttons {
@@ -67,7 +65,7 @@
 
 	.badge {
 		min-height: 20px;
-		min-width:  20px;
+		min-width: 20px;
 		@apply p-1 rounded-full leading-none text-center text-xs text-white bg-gray-600 inline-block absolute top-0 left-0;
 	}
 
